@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kinematics — Full Physics Course</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,600;0,700;0,900;1,300&family=Lora:ital,wght@0,400;0,500;1,400&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fafaf7;
+  --surface: #ffffff;
+  --surface2: #f3f1eb;
+  --border: #ddd9ce;
+  --orange: #e8521a;
+  --orange-dim: #c44010;
+  --navy: #1a2840;
+  --navy-mid: #2e4668;
+  --green: #2a7a4b;
+  --red: #c0392b;
+  --text: #1e2830;
+  --muted: #7a8a94;
+  --rule: #cdc9bc;
+  --grid-line: #edeae2;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Lora',Georgia,serif;
+  font-size:17px;
+  line-height:1.8;
+  overflow-x:hidden;
+}
+
+/* blueprint grid bg */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--orange);border-radius:2px;}
+
+/* ── SIDEBAR ─────────────────────────────────── */
+#sidebar{
+  position:fixed;top:0;left:0;
+  width:248px;height:100vh;
+  background:var(--navy);
+  overflow-y:auto;z-index:100;
+  display:flex;flex-direction:column;
+  transition:transform .3s ease;
+}
+#sb-brand{
+  padding:2rem 1.5rem 1.4rem;
+  border-bottom:1px solid #2e4668;
+}
+#sb-brand .b1{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:1.5rem;
+  color:#ffffff;letter-spacing:.03em;
+  line-height:1;text-transform:uppercase;
+}
+#sb-brand .b1 span{color:var(--orange);}
+#sb-brand .b2{
+  font-family:'Fira Code',monospace;
+  font-size:.55rem;color:#5a7a9a;
+  letter-spacing:.2em;text-transform:uppercase;
+  margin-top:.4rem;
+}
+#sidebar nav{padding:.6rem 0;flex:1;}
+.ng{
+  font-family:'Fira Code',monospace;
+  font-size:.52rem;letter-spacing:.25em;
+  text-transform:uppercase;color:#3a5a7a;
+  padding:.8rem 1.5rem .25rem;
+}
+.nl{
+  display:flex;align-items:center;gap:.55rem;
+  padding:.42rem 1.5rem;
+  color:#8aaccC;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:.95rem;font-weight:600;
+  letter-spacing:.02em;text-transform:uppercase;
+  border-left:2px solid transparent;
+  transition:all .15s;
+}
+.nl:hover{color:#fff;border-left-color:#e8521a80;background:#1e3050;}
+.nl.active{color:var(--orange);border-left-color:var(--orange);background:#1e3050;}
+.nn{
+  font-family:'Fira Code',monospace;
+  font-size:.58rem;color:#3a5a7a;min-width:20px;
+}
+#hbg{
+  display:none;
+  position:fixed;top:.8rem;left:.8rem;z-index:200;
+  background:var(--navy);border:1px solid #2e4668;
+  color:var(--orange);width:38px;height:38px;
+  border-radius:4px;cursor:pointer;font-size:1.1rem;
+  align-items:center;justify-content:center;
+}
+
+/* ── PROGRESS ─────────────────────────────────── */
+#prog{
+  position:fixed;top:0;left:248px;right:0;
+  height:3px;background:var(--orange);
+  z-index:99;transition:width .35s ease;
+}
+
+/* ── MAIN ────────────────────────────────────── */
+#main{margin-left:248px;position:relative;z-index:1;}
+
+/* ── HERO ─────────────────────────────────────── */
+#hero{
+  background:var(--navy);
+  padding:5rem 4.5rem 4rem;
+  position:relative;overflow:hidden;
+}
+#hero::after{
+  content:'v = u + at';
+  position:absolute;right:-1rem;top:50%;transform:translateY(-50%);
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:10rem;
+  color:#1e3050;line-height:1;
+  pointer-events:none;user-select:none;
+  white-space:nowrap;
+}
+.h-eye{
+  font-family:'Fira Code',monospace;
+  font-size:.65rem;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--orange);
+  margin-bottom:.7rem;
+}
+#hero h1{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:clamp(3rem,7vw,6rem);
+  line-height:.95;text-transform:uppercase;
+  color:#fff;letter-spacing:.02em;
+  margin-bottom:1.2rem;position:relative;z-index:1;
+}
+#hero h1 em{color:var(--orange);font-style:normal;}
+#hero p{
+  color:#6a8aaa;font-style:italic;
+  font-size:1rem;max-width:500px;
+  position:relative;z-index:1;
+}
+.hstats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1.5rem;margin-top:2.5rem;
+  border-top:1px solid #2e4668;padding-top:2rem;
+  position:relative;z-index:1;
+}
+.hs{text-align:center;}
+.hs-n{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:2rem;
+  color:var(--orange);display:block;
+  line-height:1;
+}
+.hs-l{
+  font-family:'Fira Code',monospace;
+  font-size:.55rem;letter-spacing:.15em;
+  text-transform:uppercase;color:#3a5a7a;
+  margin-top:.2rem;
+}
+
+/* ── SECTION ─────────────────────────────────── */
+.sec{
+  display:none;padding:3.5rem 4.5rem 5.5rem;
+  max-width:940px;
+  animation:fu .3s ease both;
+}
+.sec.active{display:block;}
+@keyframes fu{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+
+.s-eye{
+  font-family:'Fira Code',monospace;
+  font-size:.62rem;letter-spacing:.25em;
+  text-transform:uppercase;color:var(--orange);
+  margin-bottom:.4rem;
+}
+.s-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:2.6rem;
+  text-transform:uppercase;letter-spacing:.02em;
+  color:var(--navy);line-height:1.05;
+  margin-bottom:2rem;
+  border-bottom:3px solid var(--orange);
+  padding-bottom:.7rem;
+  display:inline-block;
+}
+.s-title em{color:var(--orange);font-style:normal;}
+
+h3{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:1.35rem;
+  text-transform:uppercase;letter-spacing:.04em;
+  color:var(--navy-mid);margin:2.5rem 0 .6rem;
+}
+h4{
+  font-family:'Fira Code',monospace;
+  font-size:.65rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--muted);
+  margin:1.5rem 0 .4rem;
+}
+p{margin-bottom:.9rem;color:#2e3e4a;}
+strong{color:var(--navy);}
+
+/* ── FORMULA ─────────────────────────────────── */
+.fbox{
+  background:var(--navy);color:#d0e4f4;
+  border-left:4px solid var(--orange);
+  padding:1.3rem 1.8rem;border-radius:2px;
+  margin:1.5rem 0;font-family:'Fira Code',monospace;
+}
+.fbox .fm{font-size:1.3rem;color:var(--orange);margin-bottom:.4rem;letter-spacing:.03em;}
+.fbox .fd{font-size:.76rem;color:#6a8aaa;line-height:1.75;}
+.fbox .fd span{color:#a0c8e8;}
+
+/* ── CALLOUT ─────────────────────────────────── */
+.callout{
+  border:1px solid var(--border);
+  background:var(--surface2);
+  border-left:4px solid var(--navy-mid);
+  padding:1rem 1.5rem;border-radius:2px;
+  margin:1.5rem 0;
+}
+.callout.orange{border-left-color:var(--orange);}
+.callout.green{border-left-color:var(--green);}
+.callout.red{border-left-color:var(--red);}
+.cl{
+  font-family:'Fira Code',monospace;
+  font-size:.58rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:.35rem;
+}
+
+/* ── TABLE ───────────────────────────────────── */
+.dt{
+  width:100%;border-collapse:collapse;
+  margin:1.5rem 0;font-size:.88rem;
+}
+.dt th{
+  background:var(--navy);
+  color:var(--orange);
+  font-family:'Fira Code',monospace;
+  font-size:.62rem;letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:.65rem 1rem;text-align:left;
+}
+.dt td{
+  padding:.6rem 1rem;
+  border-bottom:1px solid var(--border);
+  color:#3a4e5a;
+}
+.dt tr:nth-child(even) td{background:var(--surface2);}
+.dt tr:hover td{background:#ede9e0;color:var(--navy);}
+
+/* ── INTERACTIVE ─────────────────────────────── */
+.ibox{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-top:3px solid var(--orange);
+  border-radius:2px;padding:1.8rem;
+  margin:2rem 0;
+  box-shadow:0 2px 12px rgba(0,0,0,.06);
+}
+.ibox h4{margin-top:0;}
+.ictrls{display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:1.3rem;}
+.ictrl{display:flex;flex-direction:column;gap:.35rem;}
+.ictrl label{
+  font-family:'Fira Code',monospace;
+  font-size:.62rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);
+}
+.ictrl input[type=range]{width:155px;accent-color:var(--orange);}
+.ictrl select,.ictrl input[type=number]{
+  padding:.4rem .6rem;
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--text);font-family:'Fira Code',monospace;
+  font-size:.8rem;border-radius:2px;
+}
+.vd{
+  font-family:'Fira Code',monospace;
+  font-size:.78rem;color:var(--orange);
+  text-align:center;font-weight:500;
+}
+.ires{
+  background:var(--navy);
+  border-radius:2px;padding:1rem 1.4rem;
+  font-family:'Fira Code',monospace;
+  font-size:.83rem;color:#a0c8e8;line-height:1.9;
+}
+.ires .rv{color:var(--orange);font-size:1.15rem;}
+.ires .rv2{color:#7adfa8;}
+
+/* ── EXAMPLE ─────────────────────────────────── */
+.eg{
+  border:1px solid var(--border);
+  border-radius:2px;margin:1.5rem 0;overflow:hidden;
+}
+.eg-head{
+  background:var(--orange-dim);color:#fff;
+  padding:.55rem 1.2rem;
+  font-family:'Fira Code',monospace;
+  font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;
+}
+.eg-body{padding:1.1rem 1.3rem;}
+.eg-body .prob{font-style:italic;margin-bottom:.7rem;color:var(--orange-dim);}
+.eg-body .sol{font-size:.92rem;color:#2e3e4a;}
+.eg-body .sol p{margin-bottom:.4rem;}
+
+/* ── CANVAS ──────────────────────────────────── */
+canvas{
+  display:block;border-radius:2px;
+  border:1px solid var(--border);
+  background:#fff;margin:1rem 0;
+}
+
+/* ── GRAPH LABEL ─────────────────────────────── */
+.graph-row{display:flex;gap:1rem;flex-wrap:wrap;}
+.graph-col{flex:1;min-width:200px;}
+.graph-title{
+  font-family:'Fira Code',monospace;
+  font-size:.62rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);
+  text-align:center;margin-bottom:.3rem;
+}
+
+/* ── PROJECTILE SIM ──────────────────────────── */
+#proj-canvas{background:#fff;cursor:crosshair;}
+
+/* ── SUVAT CARDS ─────────────────────────────── */
+.suvat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:1rem;margin:1.5rem 0;
+}
+.suvat-card{
+  background:var(--navy);
+  padding:1rem;border-radius:2px;
+  border-left:3px solid var(--orange);
+  font-family:'Fira Code',monospace;
+  text-align:center;
+}
+.suvat-card .sc-eq{
+  font-size:1rem;color:var(--orange);
+  margin-bottom:.3rem;
+}
+.suvat-card .sc-miss{
+  font-size:.65rem;color:#5a7a9a;
+  letter-spacing:.05em;
+}
+
+/* ── QUIZ ─────────────────────────────────────── */
+.qcard{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:2px;padding:1.4rem 1.8rem;margin:1.2rem 0;
+  box-shadow:0 1px 6px rgba(0,0,0,.05);
+}
+.qq{font-size:1rem;margin-bottom:.9rem;color:var(--navy);font-weight:500;}
+.qopts{display:flex;flex-direction:column;gap:.45rem;}
+.qopt{
+  background:var(--surface2);border:1px solid var(--border);
+  padding:.55rem 1rem;border-radius:2px;
+  cursor:pointer;font-family:'Lora',serif;
+  font-size:.9rem;color:var(--text);text-align:left;
+  transition:all .15s;
+}
+.qopt:hover{border-color:var(--orange);color:var(--orange-dim);}
+.qopt.correct{background:#e8f5ec;border-color:var(--green);color:var(--green);}
+.qopt.wrong{background:#fdecea;border-color:var(--red);color:var(--red);}
+.qfb{margin-top:.6rem;font-size:.88rem;color:var(--muted);font-style:italic;display:none;}
+.qfb.show{display:block;}
+
+/* ── NAV BUTTONS ─────────────────────────────── */
+.nbtn{
+  display:flex;justify-content:space-between;
+  margin-top:3rem;padding-top:2rem;
+  border-top:2px solid var(--border);
+}
+.btn{
+  background:var(--orange);color:#fff;
+  border:none;padding:.65rem 1.8rem;
+  cursor:pointer;font-family:'Fira Code',monospace;
+  font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;border-radius:2px;
+  transition:background .15s;
+}
+.btn:hover{background:var(--orange-dim);}
+.btn.sec{
+  background:transparent;color:var(--muted);
+  border:1px solid var(--border);
+}
+.btn.sec:hover{border-color:var(--navy);color:var(--navy);}
+.btn:disabled{opacity:.25;cursor:default;}
+.btn:disabled:hover{background:var(--orange);}
+
+/* ── VECTOR DIAGRAM ──────────────────────────── */
+.vec-label{
+  font-family:'Fira Code',monospace;
+  font-size:.7rem;color:var(--navy);
+}
+
+@media(max-width:768px){
+  #sidebar{transform:translateX(-248px);}
+  #sidebar.open{transform:translateX(0);}
+  #main{margin-left:0;}
+  #hbg{display:flex;}
+  #hero{padding:4rem 1.5rem 2.5rem;}
+  #hero::after{font-size:3rem;}
+  .sec{padding:2rem 1.5rem 4rem;}
+  #prog{left:0;}
+  .hstats{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<button id="hbg" onclick="toggleSb()">☰</button>
+<div id="prog" style="width:0"></div>
+
+<aside id="sidebar">
+  <div id="sb-brand">
+    <div class="b1">Kine<span>matics</span></div>
+    <div class="b2">Physics — Full Course</div>
+  </div>
+  <nav>
+    <div class="ng">Start Here</div>
+    <a class="nl active" onclick="go(0)"><span class="nn">00</span>Overview</a>
+
+    <div class="ng">Fundamentals</div>
+    <a class="nl" onclick="go(1)"><span class="nn">01</span>Distance & Displacement</a>
+    <a class="nl" onclick="go(2)"><span class="nn">02</span>Speed & Velocity</a>
+    <a class="nl" onclick="go(3)"><span class="nn">03</span>Acceleration</a>
+    <a class="nl" onclick="go(4)"><span class="nn">04</span>SUVAT Equations</a>
+
+    <div class="ng">Motion Types</div>
+    <a class="nl" onclick="go(5)"><span class="nn">05</span>Uniform Motion</a>
+    <a class="nl" onclick="go(6)"><span class="nn">06</span>Uniform Acceleration</a>
+    <a class="nl" onclick="go(7)"><span class="nn">07</span>Free Fall & Gravity</a>
+    <a class="nl" onclick="go(8)"><span class="nn">08</span>Projectile Motion</a>
+
+    <div class="ng">Graphs</div>
+    <a class="nl" onclick="go(9)"><span class="nn">09</span>Displacement–Time Graphs</a>
+    <a class="nl" onclick="go(10)"><span class="nn">10</span>Velocity–Time Graphs</a>
+    <a class="nl" onclick="go(11)"><span class="nn">11</span>Acceleration–Time Graphs</a>
+
+    <div class="ng">Mastery</div>
+    <a class="nl" onclick="go(12)"><span class="nn">12</span>2D Motion & Vectors</a>
+    <a class="nl" onclick="go(13)"><span class="nn">13</span>Review & Quiz</a>
+  </nav>
+</aside>
+
+<main id="main">
+
+<!-- HERO -->
+<div id="hero">
+  <div class="h-eye">Physics — Full Course</div>
+  <h1>The Science of<br><em>Kinematics</em></h1>
+  <p>Displacement, velocity, acceleration — master the mathematics of motion from first principles to projectile trajectories.</p>
+  <div class="hstats">
+    <div class="hs"><span class="hs-n">14</span><div class="hs-l">Chapters</div></div>
+    <div class="hs"><span class="hs-n">5</span><div class="hs-l">SUVAT Eqs.</div></div>
+    <div class="hs"><span class="hs-n">10+</span><div class="hs-l">Interactives</div></div>
+    <div class="hs"><span class="hs-n">8</span><div class="hs-l">Quiz Questions</div></div>
+  </div>
+</div>
+
+<!-- ══ S0: OVERVIEW ══════════════════════════════════════ -->
+<section class="sec active" id="s0">
+  <div class="s-eye">Chapter 00</div>
+  <div class="s-title">Course <em>Overview</em></div>
+  <p>Kinematics is the branch of physics that describes <strong>how objects move</strong> — without asking why (that's dynamics/Newton's Laws). It gives us the mathematical language to describe position, velocity, and acceleration as functions of time.</p>
+
+  <table class="dt">
+    <tr><th>#</th><th>Chapter</th><th>Key Concepts</th></tr>
+    <tr><td>01</td><td>Distance & Displacement</td><td>Scalar vs vector, position</td></tr>
+    <tr><td>02</td><td>Speed & Velocity</td><td>Average & instantaneous, direction</td></tr>
+    <tr><td>03</td><td>Acceleration</td><td>Definition, units, sign convention</td></tr>
+    <tr><td>04</td><td>SUVAT Equations</td><td>5 equations, which to use when</td></tr>
+    <tr><td>05</td><td>Uniform Motion</td><td>Constant velocity, no acceleration</td></tr>
+    <tr><td>06</td><td>Uniform Acceleration</td><td>Constant a, SUVAT applications</td></tr>
+    <tr><td>07</td><td>Free Fall & Gravity</td><td>g = 9.81 m/s², sign convention</td></tr>
+    <tr><td>08</td><td>Projectile Motion</td><td>Horizontal & vertical independence</td></tr>
+    <tr><td>09</td><td>Displacement–Time Graphs</td><td>Gradient = velocity</td></tr>
+    <tr><td>10</td><td>Velocity–Time Graphs</td><td>Gradient = acceleration, area = displacement</td></tr>
+    <tr><td>11</td><td>Acceleration–Time Graphs</td><td>Area = change in velocity</td></tr>
+    <tr><td>12</td><td>2D Motion & Vectors</td><td>Components, resolving vectors</td></tr>
+    <tr><td>13</td><td>Review & Quiz</td><td>Self-assessment</td></tr>
+  </table>
+
+  <div class="callout orange">
+    <div class="cl">💡 Navigation</div>
+    Use the <strong>sidebar</strong> to jump to any chapter, or press <strong>Next →</strong> to work through in order. Live simulators and calculators are embedded throughout.
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" disabled>← Prev</button>
+    <button class="btn" onclick="go(1)">Next: Distance & Displacement →</button>
+  </div>
+</section>
+
+<!-- ══ S1: DISTANCE & DISPLACEMENT ══════════════════════ -->
+<section class="sec" id="s1">
+  <div class="s-eye">Chapter 01</div>
+  <div class="s-title">Distance &amp; <em>Displacement</em></div>
+
+  <p>These two concepts are often confused but are fundamentally different:</p>
+
+  <table class="dt">
+    <tr><th>Property</th><th>Distance</th><th>Displacement</th></tr>
+    <tr><td>Type</td><td>Scalar (magnitude only)</td><td>Vector (magnitude + direction)</td></tr>
+    <tr><td>Definition</td><td>Total path length travelled</td><td>Straight-line change in position</td></tr>
+    <tr><td>Symbol</td><td>d</td><td>s or x</td></tr>
+    <tr><td>Unit</td><td>metres (m)</td><td>metres (m) + direction</td></tr>
+    <tr><td>Can be negative?</td><td>Never</td><td>Yes (opposite to reference direction)</td></tr>
+  </table>
+
+  <div class="callout orange">
+    <div class="cl">🔑 Classic Example</div>
+    A runner completes one full lap of a 400 m track.<br>
+    <strong>Distance = 400 m</strong> (total path length)<br>
+    <strong>Displacement = 0 m</strong> (start and end at same position)
+  </div>
+
+  <h3>Position & Reference Points</h3>
+  <p>Displacement always requires a <strong>reference point (origin)</strong>. Moving 5 m to the right might be written as +5 m; returning 3 m left gives a net displacement of +2 m — even though the distance travelled is 8 m.</p>
+
+  <div class="fbox">
+    <div class="fm">s = x_final − x_initial</div>
+    <div class="fd">Displacement = final position minus initial position.<br>
+    Positive = in chosen positive direction; Negative = opposite direction.</div>
+  </div>
+
+  <canvas id="disp-canvas" width="560" height="140"></canvas>
+
+  <h3>🎛️ Distance vs Displacement Explorer</h3>
+  <div class="ibox">
+    <h4>Move an object and compare</h4>
+    <div class="ictrls">
+      <div class="ictrl">
+        <label>Journey 1: rightward (m)</label>
+        <input type="range" min="0" max="200" value="120" id="j1" oninput="calcDD()">
+        <div class="vd" id="j1v">120 m →</div>
+      </div>
+      <div class="ictrl">
+        <label>Journey 2: leftward (m)</label>
+        <input type="range" min="0" max="150" value="50" id="j2" oninput="calcDD()">
+        <div class="vd" id="j2v">← 50 m</div>
+      </div>
+    </div>
+    <div class="ires" id="dd-res"></div>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(0)">← Prev</button>
+    <button class="btn" onclick="go(2)">Next: Speed & Velocity →</button>
+  </div>
+</section>
+
+<!-- ══ S2: SPEED & VELOCITY ══════════════════════════════ -->
+<section class="sec" id="s2">
+  <div class="s-eye">Chapter 02</div>
+  <div class="s-title">Speed &amp; <em>Velocity</em></div>
+
+  <div class="fbox">
+    <div class="fm">Speed = distance / time &nbsp;&nbsp; v = d / t</div>
+    <div class="fd">Scalar — how fast, no direction. Units: m/s</div>
+  </div>
+  <div class="fbox">
+    <div class="fm">Velocity = displacement / time &nbsp;&nbsp; v = s / t</div>
+    <div class="fd">Vector — how fast AND in which direction. Units: m/s with direction.</div>
+  </div>
+
+  <h3>Average vs Instantaneous</h3>
+  <table class="dt">
+    <tr><th></th><th>Average</th><th>Instantaneous</th></tr>
+    <tr><td>Speed</td><td>total distance ÷ total time</td><td>speed at a single instant (speedometer)</td></tr>
+    <tr><td>Velocity</td><td>total displacement ÷ total time</td><td>tangent to displacement–time graph</td></tr>
+  </table>
+
+  <div class="callout">
+    <div class="cl">📌 Key Distinction</div>
+    A car driving around a roundabout at constant 30 mph has <strong>constant speed</strong> but <strong>changing velocity</strong> — because its direction continuously changes. Direction is part of velocity!
+  </div>
+
+  <h3>🎛️ Speed & Velocity Calculator</h3>
+  <div class="ibox">
+    <h4>Average Speed & Velocity</h4>
+    <div class="ictrls">
+      <div class="ictrl">
+        <label>Total Distance (m)</label>
+        <input type="range" min="10" max="1000" value="300" id="dist-sl" oninput="calcSV()">
+        <div class="vd" id="dist-v">300 m</div>
+      </div>
+      <div class="ictrl">
+        <label>Net Displacement (m)</label>
+        <input type="range" min="0" max="1000" value="180" id="disp-sl" oninput="calcSV()">
+        <div class="vd" id="disp-v">180 m</div>
+      </div>
+      <div class="ictrl">
+        <label>Time (s)</label>
+        <input type="range" min="1" max="120" value="30" id="time-sl" oninput="calcSV()">
+        <div class="vd" id="time-v">30 s</div>
+      </div>
+    </div>
+    <div class="ires" id="sv-res"></div>
+  </div>
+
+  <div class="eg">
+    <div class="eg-head">Example — Sprinter</div>
+    <div class="eg-body">
+      <p class="prob">A sprinter runs 100 m in 9.58 s. What is their average speed? (Usain Bolt, 2009)</p>
+      <div class="sol">
+        <p>v = d/t = 100 / 9.58 = <strong>10.44 m/s</strong> ≈ <strong>37.6 km/h</strong></p>
+        <p>Since the race is a straight line, speed ≈ velocity magnitude.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(1)">← Prev</button>
+    <button class="btn" onclick="go(3)">Next: Acceleration →</button>
+  </div>
+</section>
+
+<!-- ══ S3: ACCELERATION ══════════════════════════════════ -->
+<section class="sec" id="s3">
+  <div class="s-eye">Chapter 03</div>
+  <div class="s-title"><em>Acceleration</em></div>
+
+  <div class="fbox">
+    <div class="fm">a = (v − u) / t &nbsp;&nbsp;=&nbsp;&nbsp; Δv / Δt</div>
+    <div class="fd">
+      <span>a</span> = acceleration (m/s²) &nbsp;|&nbsp;
+      <span>v</span> = final velocity &nbsp;|&nbsp;
+      <span>u</span> = initial velocity &nbsp;|&nbsp;
+      <span>t</span> = time taken<br>
+      Acceleration is a <span>vector</span> — it has both magnitude and direction.
+    </div>
+  </div>
+
+  <p>Acceleration is the <strong>rate of change of velocity</strong>. It can be positive (speeding up in positive direction), negative (slowing down = deceleration), or zero (constant velocity).</p>
+
+  <h3>Sign Convention</h3>
+  <div class="callout orange">
+    <div class="cl">⚠️ Sign Convention (critical!)</div>
+    Always define a positive direction at the start of a problem.<br>
+    <strong>a > 0:</strong> accelerating in positive direction<br>
+    <strong>a < 0:</strong> decelerating (if moving +) or accelerating in − direction<br>
+    <strong>a = 0:</strong> constant velocity (or at rest)
+  </div>
+
+  <h3>🎛️ Acceleration Calculator</h3>
+  <div class="ibox">
+    <h4>a = (v − u) / t</h4>
+    <div class="ictrls">
+      <div class="ictrl">
+        <label>Initial velocity u (m/s)</label>
+        <input type="range" min="0" max="100" value="10" id="u-sl" oninput="calcAcc()">
+        <div class="vd" id="u-v">10 m/s</div>
+      </div>
+      <div class="ictrl">
+        <label>Final velocity v (m/s)</label>
+        <input type="range" min="0" max="100" value="40" id="v-sl" oninput="calcAcc()">
+        <div class="vd" id="v-v">40 m/s</div>
+      </div>
+      <div class="ictrl">
+        <label>Time t (s)</label>
+        <input type="range" min="1" max="60" value="6" id="t-sl" oninput="calcAcc()">
+        <div class="vd" id="t-v">6 s</div>
+      </div>
+    </div>
+    <div class="ires" id="acc-res"></div>
+  </div>
+
+  <div class="eg">
+    <div class="eg-head">Example — Car Braking</div>
+    <div class="eg-body">
+      <p class="prob">A car travelling at 30 m/s brakes to a stop in 5 s. Find the acceleration.</p>
+      <div class="sol">
+        <p>a = (v − u) / t = (0 − 30) / 5 = <strong>−6 m/s²</strong></p>
+        <p>Negative sign shows deceleration (opposing motion). The magnitude is 6 m/s².</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(2)">← Prev</button>
+    <button class="btn" onclick="go(4)">Next: SUVAT Equations →</button>
+  </div>
+</section>
+
+<!-- ══ S4: SUVAT ══════════════════════════════════════════ -->
+<section class="sec" id="s4">
+  <div class="s-eye">Chapter 04</div>
+  <div class="s-title"><em>SUVAT</em> Equations</div>
+
+  <p>The five SUVAT equations describe <strong>uniformly accelerated motion</strong> (constant acceleration). They connect five variables: <strong>s, u, v, a, t</strong>.</p>
+
+  <div class="fbox">
+    <div class="fm">s = displacement (m) &nbsp;|&nbsp; u = initial velocity (m/s)</div>
+    <div class="fm">v = final velocity (m/s) &nbsp;|&nbsp; a = acceleration (m/s²) &nbsp;|&nbsp; t = time (s)</div>
+    <div class="fd">You always know 3 of the 5 variables — pick the equation with your 3 knowns + 1 unknown.</div>
+  </div>
+
+  <div class="suvat-grid">
+    <div class="suvat-card">
+      <div class="sc-eq">v = u + at</div>
+      <div class="sc-miss">Missing: s</div>
+    </div>
+    <div class="suvat-card">
+      <div class="sc-eq">s = ut + ½at²</div>
+      <div class="sc-miss">Missing: v</div>
+    </div>
+    <div class="suvat-card">
+      <div class="sc-eq">v² = u² + 2as</div>
+      <div class="sc-miss">Missing: t</div>
+    </div>
+    <div class="suvat-card">
+      <div class="sc-eq">s = ½(u+v)t</div>
+      <div class="sc-miss">Missing: a</div>
+    </div>
+    <div class="suvat-card">
+      <div class="sc-eq">s = vt − ½at²</div>
+      <div class="sc-miss">Missing: u</div>
+    </div>
+  </div>
+
+  <h3>🎛️ SUVAT Solver</h3>
+  <div class="ibox">
+    <h4>Enter any 3 values — solver finds the rest</h4>
+    <div class="ictrls" style="flex-direction:column;align-items:flex-start;">
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+        <div class="ictrl">
+          <label>s (m) — blank to solve</label>
+          <input type="number" id="sv-s" placeholder="?" style="width:90px;" oninput="solveSUVAT()">
+        </div>
+        <div class="ictrl">
+          <label>u (m/s)</label>
+          <input type="number" id="sv-u" placeholder="?" style="width:90px;" oninput="solveSUVAT()">
+        </div>
+        <div class="ictrl">
+          <label>v (m/s)</label>
+          <input type="number" id="sv-v" placeholder="?" style="width:90px;" oninput="solveSUVAT()">
+        </div>
+        <div class="ictrl">
+          <label>a (m/s²)</label>
+          <input type="number" id="sv-a" placeholder="?" style="width:90px;" oninput="solveSUVAT()">
+        </div>
+        <div class="ictrl">
+          <label>t (s)</label>
+          <input type="number" id="sv-t" placeholder="?" style="width:90px;" oninput="solveSUVAT()">
+        </div>
+      </div>
+    </div>
+    <div class="ires" id="suvat-res">Enter 3 known values above to solve.</div>
+  </div>
+
+  <div class="eg">
+    <div class="eg-head">Example — Train Stopping</div>
+    <div class="eg-body">
+      <p class="prob">A train travelling at 50 m/s decelerates at 2 m/s². How far does it travel before stopping?</p>
+      <div class="sol">
+        <p>Known: u = 50 m/s, v = 0, a = −2 m/s². Find s. Missing: t → use v² = u² + 2as</p>
+        <p>0 = 2500 + 2(−2)s → 4s = 2500 → <strong>s = 625 m</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(3)">← Prev</button>
+    <button class="btn" onclick="go(5)">Next: Uniform Motion →</button>
+  </div>
+</section>
+
+<!-- ══ S5: UNIFORM MOTION ════════════════════════════════ -->
+<section class="sec" id="s5">
+  <div class="s-eye">Chapter 05</div>
+  <div class="s-title">Uniform <em>Motion</em></div>
+
+  <p><strong>Uniform motion</strong> means motion at <strong>constant velocity</strong> — zero acceleration. The object covers equal distances in equal time intervals.</p>
+
+  <div class="fbox">
+    <div class="fm">s = v × t &nbsp;&nbsp; (a = 0)</div>
+    <div class="fd">Displacement = constant velocity × time.<br>This is a special case of SUVAT with a = 0, so u = v throughout.</div>
+  </div>
+
+  <h3>Characteristics</h3>
+  <ul style="margin-left:1.5rem;margin-bottom:1rem;">
+    <li style="margin-bottom:.5rem"><strong>Displacement–time graph:</strong> Straight line (non-zero slope)</li>
+    <li style="margin-bottom:.5rem"><strong>Velocity–time graph:</strong> Horizontal line</li>
+    <li style="margin-bottom:.5rem"><strong>Acceleration–time graph:</strong> Flat at zero</li>
+  </ul>
+
+  <canvas id="uniform-canvas" width="560" height="160"></canvas>
+
+  <h3>🎛️ Uniform Motion Simulator</h3>
+  <div class="ibox">
+    <h4>Constant Velocity Motion</h4>
+    <div class="ictrls">
+      <div class="ictrl">
+        <label>Velocity (m/s)</label>
+        <input type="range" min="1" max="50" value="15" id="uv-sl" oninput="simUniform()">
+        <div class="vd" id="uv-v">15 m/s</div>
+      </div>
+      <div class="ictrl">
+        <label>Time (s)</label>
+        <input type="range" min="1" max="30" value="10" id="ut-sl" oninput="simUniform()">
+        <div class="vd" id="ut-v">10 s</div>
+      </div>
+    </div>
+    <div class="ires" id="unif-res"></div>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(4)">← Prev</button>
+    <button class="btn" onclick="go(6)">Next: Uniform Acceleration →</button>
+  </div>
+</section>
+
+<!-- ══ S6: UNIFORM ACCELERATION ════════════════════════ -->
+<section class="sec" id="s6">
+  <div class="s-eye">Chapter 06</div>
+  <div class="s-title">Uniform <em>Acceleration</em></div>
+
+  <p>Uniform acceleration means <strong>constant acceleration</strong>. Velocity changes by the same amount each second. This is the most common type of motion in kinematics problems.</p>
+
+  <h3>Key Features</h3>
+  <ul style="margin-left:1.5rem;margin-bottom:1rem;">
+    <li style="margin-bottom:.4rem"><strong>s–t graph:</strong> Parabola (curved)</li>
+    <li style="margin-bottom:.4rem"><strong>v–t graph:</strong> Straight diagonal line</li>
+    <li style="margin-bottom:.4rem"><strong>a–t graph:</strong> Horizontal line (non-zero constant)</li>
+    <li style="margin-bottom:.4rem">Equal velocity increments per second</li>
+  </ul>
+
+  <h3>🎛️ Uniformly Accelerated Motion Calculator</h3>
+  <div class="ibox">
+    <h4>Full SUVAT at a glance</h4>
+    <div class="ictrls">
+      <div class="ictrl">
+        <label>Initial velocity u (m/s)</label>
+        <input type="range" min="0" max="50" value="5" id="ua-u" oninput="calcUA()">
+        <div class="vd" id="ua-uv">5 m/s</div>
+      </div>
+      <div class="ictrl">
+        <label>Acceleration a (m/s²)</label>
+        <input type="range" min="0" max="20" value="3" id="ua-a" oninput="calcUA()">
+        <div class="vd" id="ua-av">3 m/s²</div>
+      </div>
+      <div class="ictrl">
+        <label>Time t (s)</label>
+        <input type="range" min="1" max="20" value="8" id="ua-t" oninput="calcUA()">
+        <div class="vd" id="ua-tv">8 s</div>
+      </div>
+    </div>
+    <div class="ires" id="ua-res"></div>
+    <canvas id="ua-canvas" width="540" height="160" style="margin-top:1rem;background:#fff;"></canvas>
+  </div>
+
+  <div class="eg">
+    <div class="eg-head">Example — Sports Car</div>
+    <div class="eg-body">
+      <p class="prob">A sports car accelerates from rest at 4.5 m/s² for 6 seconds. Find final speed and distance covered.</p>
+      <div class="sol">
+        <p>u = 0, a = 4.5, t = 6</p>
+        <p>v = u + at = 0 + 4.5×6 = <strong>27 m/s (97.2 km/h)</strong></p>
+        <p>s = ut + ½at² = 0 + ½(4.5)(36) = <strong>81 m</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(5)">← Prev</button>
+    <button class="btn" onclick="go(7)">Next: Free Fall & Gravity →</button>
+  </div>
+</section>
+
+<!-- ══ S7: FREE FALL ═════════════════════════════════════ -->
+<section class="sec" id="s7">
+  <div class="s-eye">Chapter 07</div>
+  <div class="s-title">Free Fall &amp; <em>Gravity</em></div>
+
+  <p><strong>Free fall</strong> is the motion of an object under gravity alone — no air resistance, no thrust. Near Earth's surface, all objects accelerate downward at the same rate regardless of mass.</p>
+
+  <div class="fbox">
+    <div class="fm">g = 9.81 m/s² (downward)</div>
+    <div class="fd">
+      Standard gravitational acceleration at Earth's surface.<br>
+      In free fall: <span>a = −g = −9.81 m/s²</span> (taking upward as positive)<br>
+      Moon: g ≈ 1.62 m/s² &nbsp;|&nbsp; Mars: g ≈ 3.72 m/s²
+    </div>
+  </div>
+
+  <h3>SUVAT for Free Fall</h3>
+  <p>Apply the 5 SUVAT equations with <strong>a = ±9.81 m/s²</strong>. Always define your positive direction first (usually upward positive is most intuitive):</p>
+
+  <table class="dt">
+    <tr><th>Scenario</th><th>u</th><th>a</th><th>Key equation</th></tr>
+    <tr><td>Dropped from rest</td><td>0</td><td>−9.81</td><td>s = ½gt² (downward)</td></tr>
+    <tr><td>Thrown upward at u</td><td>+u</td><td>−9.81</td><td>v = u − gt at top: v=0</td></tr>
+    <tr><td>Time to hit ground</td><td>0</td><td>+9.81</td><td>t = √(2h/g)</td></tr>
+  </table>
+
+  <h3>🎛️ Free Fall Calculator</h3>
+  <div class="ibox">
+    <h4>Object dropped from height h</h4>
+    <div class="ictrls">
+      <div class="ictrl">
+        <label>Height h (m)</label>
+        <input type="range" min="1" max="500" value="45" id="ff-h" oninput="calcFF()">
+        <div class="vd" id="ff-hv">45 m</div>
+      </div>
+      <div class="ictrl">
+        <label>Planet g (m/s²)</label>
+        <select id="ff-g" onchange="calcFF()">
+          <option value="9.81">Earth (9.81)</option>
+          <option value="1.62">Moon (1.62)</option>
+          <option value="3.72">Mars (3.72)</option>
+          <option value="24.8">Jupiter (24.8)</option>
+          <option value="11.15">Saturn (11.15)</option>
+        </select>
+      </div>
+    </div>
+    <div class="ires" id="ff-res"></div>
+  </div>
+
+  <div class="callout red">
+    <div class="cl">⚠️ Common Mistake</div>
+    When an object is thrown upward, at the <strong>maximum height</strong> the velocity is zero but acceleration is <em>still</em> −9.81 m/s² downward. Gravity never "switches off"!
+  </div>
+
+  <div class="eg">
+    <div class="eg-head">Example — Ball Thrown Upward</div>
+    <div class="eg-body">
+      <p class="prob">A ball is thrown straight up at 20 m/s. Find the maximum height and total time of flight.</p>
+      <div class="sol">
+        <p>At max height, v = 0. Using v² = u² + 2as: 0 = 400 + 2(−9.81)s → <strong>s = 20.4 m</strong></p>
+        <p>Time up: t = (v−u)/a = (0−20)/(−9.81) = 2.04 s. Total flight = 2 × 2.04 = <strong>4.08 s</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(6)">← Prev</button>
+    <button class="btn" onclick="go(8)">Next: Projectile Motion →</button>
+  </div>
+</section>
+
+<!-- ══ S8: PROJECTILE MOTION ════════════════════════════ -->
+<section class="sec" id="s8">
+  <div class="s-eye">Chapter 08</div>
+  <div class="s-title">Projectile <em>Motion</em></div>
+
+  <div class="callout orange">
+    <div class="cl">🔑 Key Principle</div>
+    Horizontal and vertical motions are <strong>completely independent</strong>.<br>
+    <strong>Horizontal:</strong> constant velocity (no air resistance) — uniform motion<br>
+    <strong>Vertical:</strong> constant acceleration g downward — free fall
+  </div>
+
+  <div class="fbox">
+    <div class="fm">x = u·cosθ · t &nbsp;&nbsp;&nbsp; y = u·sinθ · t − ½g·t²</div>
+    <div class="fd">
+      <span>u</span> = launch speed &nbsp;|&nbsp; <span>θ</span> = launch angle &nbsp;|&nbsp; <span>g</span> = 9.81 m/s²<br>
+      <span>Range</span> = u²·sin(2θ)/g &nbsp;|&nbsp; <span>Max height</span> = u²·sin²θ/(2g) &nbsp;|&nbsp; <span>Time of flight</span> = 2u·sinθ/g
+    </div>
+  </div>
+
+  <h3>🎛️ Projectile Simulator</h3>
+  <div class="ibox">
+    <h4>Launch angle & speed explorer</h4>
+    <div class="ictrls">
+      <div class="ictrl">
+        <label>Launch speed u (m/s)</label>
+        <input type="range" min="5" max="80" value="30" id="pj-u" oninput="simProj()">
+        <div class="vd" id="pj-uv">30 m/s</div>
+      </div>
+      <div class="ictrl">
+        <label>Angle θ (°)</label>
+        <input type="range" min="1" max="89" value="45" id="pj-ang" oninput="simProj()">
+        <div class="vd" id="pj-angv">45°</div>
+      </div>
+      <div class="ictrl">
+        <label>Initial height h (m)</label>
+        <input type="range" min="0" max="50" value="0" id="pj-h" oninput="simProj()">
+        <div class="vd" id="pj-hv">0 m</div>
+      </div>
+    </div>
+    <canvas id="proj-canvas" width="560" height="220"></canvas>
+    <div class="ires" id="proj-res" style="margin-top:.8rem;"></div>
+  </div>
+
+  <h3>Maximum Range</h3>
+  <p>For a given launch speed from flat ground, <strong>θ = 45°</strong> gives maximum range. Complementary angles (e.g. 30° and 60°) give the same range but different trajectories.</p>
+
+  <div class="eg">
+    <div class="eg-head">Example — Football Kick</div>
+    <div class="eg-body">
+      <p class="prob">A football is kicked at 25 m/s at 30° to the horizontal. Find the range.</p>
+      <div class="sol">
+        <p>Range = u²·sin(2θ)/g = 625 × sin(60°) / 9.81 = 625 × 0.866 / 9.81 = <strong>55.1 m</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(7)">← Prev</button>
+    <button class="btn" onclick="go(9)">Next: s–t Graphs →</button>
+  </div>
+</section>
+
+<!-- ══ S9: s-t GRAPHS ════════════════════════════════════ -->
+<section class="sec" id="s9">
+  <div class="s-eye">Chapter 09</div>
+  <div class="s-title">Displacement–Time <em>Graphs</em></div>
+
+  <div class="callout orange">
+    <div class="cl">🔑 Key Rule</div>
+    The <strong>gradient (slope)</strong> of a displacement–time graph = <strong>velocity</strong><br>
+    Steep slope → high velocity. Horizontal → at rest. Negative slope → moving backwards.
+  </div>
+
+  <table class="dt">
+    <tr><th>Graph Shape</th><th>Motion</th></tr>
+    <tr><td>Horizontal line</td><td>At rest (v = 0)</td></tr>
+    <tr><td>Straight diagonal line</td><td>Constant velocity (uniform motion)</td></tr>
+    <tr><td>Curved (concave up)</td><td>Accelerating (velocity increasing)</td></tr>
+    <tr><td>Curved (concave down)</td><td>Decelerating (velocity decreasing)</td></tr>
+    <tr><td>Negative slope</td><td>Moving in negative direction</td></tr>
+    <tr><td>Returns to x-axis</td><td>Back at starting point</td></tr>
+  </table>
+
+  <canvas id="st-canvas" width="560" height="200"></canvas>
+
+  <h3>Reading the Gradient</h3>
+  <p>For a curved s–t graph, the instantaneous velocity at any point equals the gradient of the <strong>tangent line</strong> at that point. This is the derivative ds/dt.</p>
+
+  <div class="fbox">
+    <div class="fm">v = ds/dt = gradient of s–t graph</div>
+    <div class="fd">For a straight section: gradient = Δs/Δt = rise/run</div>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(8)">← Prev</button>
+    <button class="btn" onclick="go(10)">Next: v–t Graphs →</button>
+  </div>
+</section>
+
+<!-- ══ S10: v-t GRAPHS ═══════════════════════════════════ -->
+<section class="sec" id="s10">
+  <div class="s-eye">Chapter 10</div>
+  <div class="s-title">Velocity–Time <em>Graphs</em></div>
+
+  <p>The velocity–time graph is the most informative kinematic graph — it gives you both acceleration (gradient) and displacement (area).</p>
+
+  <div class="callout orange">
+    <div class="cl">🔑 Two Key Rules</div>
+    1. <strong>Gradient</strong> of v–t graph = <strong>acceleration</strong><br>
+    2. <strong>Area under</strong> v–t graph = <strong>displacement</strong>
+  </div>
+
+  <table class="dt">
+    <tr><th>Graph Feature</th><th>Meaning</th></tr>
+    <tr><td>Horizontal line</td><td>Constant velocity (a = 0)</td></tr>
+    <tr><td>Straight positive slope</td><td>Constant positive acceleration</td></tr>
+    <tr><td>Straight negative slope</td><td>Constant deceleration</td></tr>
+    <tr><td>v = 0 (touches x-axis)</td><td>Momentarily at rest</td></tr>
+    <tr><td>Area above x-axis</td><td>Displacement in positive direction</td></tr>
+    <tr><td>Area below x-axis</td><td>Displacement in negative direction</td></tr>
+  </table>
+
+  <h3>🎛️ v–t Graph Builder</h3>
+  <div class="ibox">
+    <h4>Uniformly accelerated motion on v–t graph</h4>
+    <div class="ictrls">
+      <div class="ictrl">
+        <label>Initial velocity u (m/s)</label>
+        <input type="range" min="0" max="40" value="5" id="vt-u" oninput="drawVT()">
+        <div class="vd" id="vt-uv">5 m/s</div>
+      </div>
+      <div class="ictrl">
+        <label>Acceleration a (m/s²)</label>
+        <input type="range" min="-10" max="10" value="3" id="vt-a" oninput="drawVT()">
+        <div class="vd" id="vt-av">3 m/s²</div>
+      </div>
+      <div class="ictrl">
+        <label>Time t (s)</label>
+        <input type="range" min="1" max="15" value="8" id="vt-t" oninput="drawVT()">
+        <div class="vd" id="vt-tv">8 s</div>
+      </div>
+    </div>
+    <canvas id="vt-canvas" width="540" height="200" style="background:#fff;"></canvas>
+    <div class="ires" id="vt-res" style="margin-top:.8rem;"></div>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(9)">← Prev</button>
+    <button class="btn" onclick="go(11)">Next: a–t Graphs →</button>
+  </div>
+</section>
+
+<!-- ══ S11: a-t GRAPHS ═══════════════════════════════════ -->
+<section class="sec" id="s11">
+  <div class="s-eye">Chapter 11</div>
+  <div class="s-title">Acceleration–Time <em>Graphs</em></div>
+
+  <div class="callout orange">
+    <div class="cl">🔑 Key Rule</div>
+    <strong>Area under</strong> an acceleration–time graph = <strong>change in velocity (Δv)</strong>
+  </div>
+
+  <table class="dt">
+    <tr><th>Graph Shape</th><th>Motion</th></tr>
+    <tr><td>Horizontal line at 0</td><td>Constant velocity (or at rest)</td></tr>
+    <tr><td>Horizontal line above 0</td><td>Uniform acceleration</td></tr>
+    <tr><td>Horizontal line below 0</td><td>Uniform deceleration</td></tr>
+    <tr><td>Varying line</td><td>Non-uniform acceleration</td></tr>
+  </table>
+
+  <h3>Connecting All Three Graphs</h3>
+
+  <div class="fbox">
+    <div class="fm">s(t) → differentiate → v(t) → differentiate → a(t)</div>
+    <div class="fm">a(t) → integrate → v(t) → integrate → s(t)</div>
+    <div class="fd">
+      Differentiation gives rate of change (going "down" the chain).<br>
+      Integration gives accumulated quantity (going "up" the chain).
+    </div>
+  </div>
+
+  <canvas id="at-canvas" width="560" height="200"></canvas>
+
+  <h3>Summary: Reading Motion Graphs</h3>
+  <table class="dt">
+    <tr><th>Graph</th><th>Gradient gives</th><th>Area gives</th></tr>
+    <tr><td>s–t</td><td>Velocity</td><td>— (not meaningful)</td></tr>
+    <tr><td>v–t</td><td>Acceleration</td><td>Displacement</td></tr>
+    <tr><td>a–t</td><td>Rate of change of acceleration (jerk)</td><td>Change in velocity</td></tr>
+  </table>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(10)">← Prev</button>
+    <button class="btn" onclick="go(12)">Next: 2D Motion & Vectors →</button>
+  </div>
+</section>
+
+<!-- ══ S12: 2D MOTION & VECTORS ═════════════════════════ -->
+<section class="sec" id="s12">
+  <div class="s-eye">Chapter 12</div>
+  <div class="s-title">2D Motion &amp; <em>Vectors</em></div>
+
+  <p>Real-world motion is rarely in a straight line. For 2D kinematics, we <strong>resolve vectors into components</strong> and treat each axis independently.</p>
+
+  <div class="fbox">
+    <div class="fm">v_x = v·cosθ &nbsp;&nbsp;&nbsp; v_y = v·sinθ</div>
+    <div class="fd">
+      Resolve any velocity into horizontal (x) and vertical (y) components.<br>
+      Apply kinematics separately to each direction.
+    </div>
+  </div>
+
+  <h3>Combining Perpendicular Components</h3>
+  <div class="fbox">
+    <div class="fm">|v| = √(v_x² + v_y²) &nbsp;&nbsp;&nbsp; θ = arctan(v_y / v_x)</div>
+    <div class="fd">Magnitude and direction of resultant vector from components.</div>
+  </div>
+
+  <h3>🎛️ Vector Resolver</h3>
+  <div class="ibox">
+    <h4>Resolve velocity into components</h4>
+    <div class="ictrls">
+      <div class="ictrl">
+        <label>Speed |v| (m/s)</label>
+        <input type="range" min="1" max="100" value="40" id="vr-v" oninput="resolveVec()">
+        <div class="vd" id="vr-vv">40 m/s</div>
+      </div>
+      <div class="ictrl">
+        <label>Angle θ (° from horiz.)</label>
+        <input type="range" min="0" max="90" value="35" id="vr-ang" oninput="resolveVec()">
+        <div class="vd" id="vr-angv">35°</div>
+      </div>
+    </div>
+    <canvas id="vec-canvas" width="340" height="200" style="background:#fff;"></canvas>
+    <div class="ires" id="vec-res" style="margin-top:.8rem;"></div>
+  </div>
+
+  <h3>Relative Motion</h3>
+  <p>Velocity depends on the observer's reference frame. A passenger on a train moving at 30 m/s throws a ball forward at 10 m/s — a stationary observer sees the ball at 40 m/s.</p>
+
+  <div class="fbox">
+    <div class="fm">v_AB = v_A − v_B</div>
+    <div class="fd">Velocity of A relative to B = velocity of A minus velocity of B (in same reference frame).</div>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(11)">← Prev</button>
+    <button class="btn" onclick="go(13)">Next: Review & Quiz →</button>
+  </div>
+</section>
+
+<!-- ══ S13: QUIZ ══════════════════════════════════════════ -->
+<section class="sec" id="s13">
+  <div class="s-eye">Chapter 13</div>
+  <div class="s-title">Review &amp; <em>Quiz</em></div>
+
+  <p>Test your mastery of kinematics. Click an answer to reveal feedback.</p>
+
+  <div class="qcard">
+    <div class="qq">1. A car travels 100 m east, then 60 m west. What is its displacement?</div>
+    <div class="qopts">
+      <button class="qopt" onclick="ans(this,false,'q1')">160 m east</button>
+      <button class="qopt" onclick="ans(this,true,'q1')">40 m east</button>
+      <button class="qopt" onclick="ans(this,false,'q1')">40 m west</button>
+      <button class="qopt" onclick="ans(this,false,'q1')">160 m total</button>
+    </div>
+    <div class="qfb" id="q1-fb">✅ Displacement = 100 − 60 = 40 m east. Distance = 160 m. Don't confuse them!</div>
+  </div>
+
+  <div class="qcard">
+    <div class="qq">2. A ball is thrown upward at 15 m/s. What is its acceleration at the highest point?</div>
+    <div class="qopts">
+      <button class="qopt" onclick="ans(this,false,'q2')">0 m/s² (momentarily at rest)</button>
+      <button class="qopt" onclick="ans(this,true,'q2')">9.81 m/s² downward</button>
+      <button class="qopt" onclick="ans(this,false,'q2')">15 m/s² upward</button>
+      <button class="qopt" onclick="ans(this,false,'q2')">9.81 m/s² upward</button>
+    </div>
+    <div class="qfb" id="q2-fb">✅ Gravity always acts downward at 9.81 m/s² regardless of velocity. At the peak, v = 0 but a = g downward.</div>
+  </div>
+
+  <div class="qcard">
+    <div class="qq">3. The gradient of a velocity–time graph represents:</div>
+    <div class="qopts">
+      <button class="qopt" onclick="ans(this,false,'q3')">Displacement</button>
+      <button class="qopt" onclick="ans(this,false,'q3')">Speed</button>
+      <button class="qopt" onclick="ans(this,true,'q3')">Acceleration</button>
+      <button class="qopt" onclick="ans(this,false,'q3')">Distance</button>
+    </div>
+    <div class="qfb" id="q3-fb">✅ Gradient of v–t = acceleration. Area under v–t = displacement. Both are critical rules!</div>
+  </div>
+
+  <div class="qcard">
+    <div class="qq">4. An object starts at rest and accelerates at 5 m/s² for 4 s. How far does it travel?</div>
+    <div class="qopts">
+      <button class="qopt" onclick="ans(this,false,'q4')">20 m</button>
+      <button class="qopt" onclick="ans(this,false,'q4')">80 m</button>
+      <button class="qopt" onclick="ans(this,true,'q4')">40 m</button>
+      <button class="qopt" onclick="ans(this,false,'q4')">10 m</button>
+    </div>
+    <div class="qfb" id="q4-fb">✅ s = ut + ½at² = 0 + ½(5)(16) = 40 m. Remember u = 0 (starts from rest).</div>
+  </div>
+
+  <div class="qcard">
+    <div class="qq">5. A projectile is launched at 20 m/s at 60°. What is the horizontal component of velocity?</div>
+    <div class="qopts">
+      <button class="qopt" onclick="ans(this,false,'q5')">20 m/s</button>
+      <button class="qopt" onclick="ans(this,false,'q5')">17.3 m/s</button>
+      <button class="qopt" onclick="ans(this,true,'q5')">10 m/s</button>
+      <button class="qopt" onclick="ans(this,false,'q5')">14.1 m/s</button>
+    </div>
+    <div class="qfb" id="q5-fb">✅ v_x = v·cos60° = 20 × 0.5 = 10 m/s. Horizontal component stays constant throughout flight.</div>
+  </div>
+
+  <div class="qcard">
+    <div class="qq">6. Which SUVAT equation should you use when time is unknown?</div>
+    <div class="qopts">
+      <button class="qopt" onclick="ans(this,false,'q6')">v = u + at</button>
+      <button class="qopt" onclick="ans(this,false,'q6')">s = ut + ½at²</button>
+      <button class="qopt" onclick="ans(this,true,'q6')">v² = u² + 2as</button>
+      <button class="qopt" onclick="ans(this,false,'q6')">s = ½(u+v)t</button>
+    </div>
+    <div class="qfb" id="q6-fb">✅ v² = u² + 2as is the only SUVAT equation with no t — use it when time is not given and not needed.</div>
+  </div>
+
+  <div class="qcard">
+    <div class="qq">7. An object is dropped from 80 m. How long does it take to hit the ground? (g = 10 m/s²)</div>
+    <div class="qopts">
+      <button class="qopt" onclick="ans(this,false,'q7')">8 s</button>
+      <button class="qopt" onclick="ans(this,true,'q7')">4 s</button>
+      <button class="qopt" onclick="ans(this,false,'q7')">2 s</button>
+      <button class="qopt" onclick="ans(this,false,'q7')">16 s</button>
+    </div>
+    <div class="qfb" id="q7-fb">✅ s = ½gt² → 80 = ½(10)t² → t² = 16 → t = 4 s.</div>
+  </div>
+
+  <div class="qcard">
+    <div class="qq">8. At what angle should a projectile be launched for maximum range (on flat ground)?</div>
+    <div class="qopts">
+      <button class="qopt" onclick="ans(this,false,'q8')">30°</button>
+      <button class="qopt" onclick="ans(this,false,'q8')">60°</button>
+      <button class="qopt" onclick="ans(this,true,'q8')">45°</button>
+      <button class="qopt" onclick="ans(this,false,'q8')">90°</button>
+    </div>
+    <div class="qfb" id="q8-fb">✅ Range = u²·sin(2θ)/g is maximised when sin(2θ) = 1, i.e. 2θ = 90° → θ = 45°.</div>
+  </div>
+
+  <div style="margin-top:2rem;background:var(--navy);border-radius:4px;padding:2rem;text-align:center;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:2rem;text-transform:uppercase;color:var(--orange);letter-spacing:.05em;margin-bottom:.5rem;">🎓 Course Complete!</div>
+    <p style="color:#6a8aaa;font-style:italic;">You've covered Kinematics from displacement to projectile motion.<br>Ready for Dynamics & Newton's Laws next?</p>
+    <button class="btn" style="margin-top:1rem;" onclick="go(0)">↩ Back to Overview</button>
+  </div>
+
+  <div class="nbtn">
+    <button class="btn sec" onclick="go(12)">← Prev</button>
+    <button class="btn" disabled>Course Complete ✓</button>
+  </div>
+</section>
+
+</main>
+
+<script>
+// ── NAVIGATION ─────────────────────────────────────
+const N = 14;
+let cur = 0;
+function go(n) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nl').forEach(l => l.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  document.querySelectorAll('.nl')[n].classList.add('active');
+  cur = n;
+  document.getElementById('prog').style.width = ((n/(N-1))*100)+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(window.innerWidth<768) document.getElementById('sidebar').classList.remove('open');
+  // trigger canvas draws
+  if(n===1) drawDisp();
+  if(n===5) drawUniform();
+  if(n===6) { calcUA(); }
+  if(n===8) simProj();
+  if(n===9) drawST();
+  if(n===10) drawVT();
+  if(n===11) drawAT();
+  if(n===12) resolveVec();
+}
+function toggleSb() { document.getElementById('sidebar').classList.toggle('open'); }
+
+// ── CANVAS HELPER ─────────────────────────────────
+function ctx(id) { return document.getElementById(id).getContext('2d'); }
+const C = (id) => document.getElementById(id);
+
+function drawAxes(c, W, H, ox, oy, xLabel, yLabel, color='#ddd9ce') {
+  c.strokeStyle = color; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(ox, 10); c.lineTo(ox, H-20); c.stroke();
+  c.beginPath(); c.moveTo(ox-10, oy); c.lineTo(W-10, oy); c.stroke();
+  c.fillStyle = '#7a8a94'; c.font = '10px Fira Code, monospace';
+  c.textAlign = 'center'; c.fillText(xLabel, W-20, oy+14);
+  c.textAlign = 'left'; c.fillText(yLabel, ox+4, 18);
+  // arrowheads
+  c.fillStyle = color;
+  c.beginPath(); c.moveTo(W-10,oy-4); c.lineTo(W-10,oy+4); c.lineTo(W-2,oy); c.fill();
+  c.beginPath(); c.moveTo(ox-4,12); c.lineTo(ox+4,12); c.lineTo(ox,4); c.fill();
+}
+
+// ── S1: DISPLACEMENT DIAGRAM ───────────────────────
+function drawDisp() {
+  const c = ctx('disp-canvas'); const W=560,H=140;
+  c.clearRect(0,0,W,H);
+  c.strokeStyle='#ddd9ce'; c.lineWidth=1;
+  c.beginPath(); c.moveTo(40,70); c.lineTo(520,70); c.stroke();
+  // Origin
+  c.fillStyle='#1a2840'; c.font='bold 12px Fira Code';
+  c.textAlign='center'; c.fillText('O',40,88);
+  c.beginPath(); c.arc(40,70,4,0,Math.PI*2); c.fillStyle='#1a2840'; c.fill();
+  // right journey
+  c.strokeStyle='#e8521a'; c.lineWidth=3;
+  c.beginPath(); c.moveTo(40,55); c.lineTo(320,55); c.stroke();
+  c.fillStyle='#e8521a'; c.font='11px Fira Code';
+  c.textAlign='center'; c.fillText('→ 280 m journey 1',180,44);
+  c.beginPath(); c.arc(320,55,5,0,Math.PI*2); c.fill();
+  // left journey
+  c.strokeStyle='#2a7a4b'; c.lineWidth=3;
+  c.beginPath(); c.moveTo(320,85); c.lineTo(160,85); c.stroke();
+  c.fillStyle='#2a7a4b'; c.font='11px Fira Code';
+  c.textAlign='center'; c.fillText('← 160 m journey 2',240,100);
+  c.beginPath(); c.arc(160,85,5,0,Math.PI*2); c.fill();
+  // displacement
+  c.strokeStyle='#1a2840'; c.lineWidth=2; c.setLineDash([5,4]);
+  c.beginPath(); c.moveTo(40,115); c.lineTo(160,115); c.stroke();
+  c.setLineDash([]);
+  c.fillStyle='#1a2840'; c.font='11px Fira Code'; c.textAlign='center';
+  c.fillText('Displacement = 120 m →', 100, 130);
+  c.fillStyle='#7a8a94'; c.font='10px Fira Code';
+  c.fillText('Distance = 280+160 = 440 m', 380, 130);
+}
+drawDisp();
+
+// ── S1: DD CALCULATOR ──────────────────────────────
+function calcDD() {
+  const j1 = +C('j1').value, j2 = +C('j2').value;
+  C('j1v').textContent = j1+' m →';
+  C('j2v').textContent = '← '+j2+' m';
+  const dist = j1+j2, disp = j1-j2;
+  C('dd-res').innerHTML =
+    `Distance = ${j1} + ${j2} = <span class="rv">${dist} m</span> (total path)<br>
+     Displacement = ${j1} − ${j2} = <span class="rv2">${disp} m</span> ${disp>0?'(rightward)':disp<0?'(leftward)':'(back at start)'}`;
+}
+calcDD();
+
+// ── S2: SPEED & VELOCITY CALC ─────────────────────
+function calcSV() {
+  const d = +C('dist-sl').value, s = +C('disp-sl').value, t = +C('time-sl').value;
+  C('dist-v').textContent = d+' m';
+  C('disp-v').textContent = s+' m';
+  C('time-v').textContent = t+' s';
+  C('sv-res').innerHTML =
+    `Avg Speed = ${d}/${t} = <span class="rv">${(d/t).toFixed(2)} m/s</span><br>
+     Avg Velocity = ${s}/${t} = <span class="rv2">${(s/t).toFixed(2)} m/s</span><br>
+     <span style="color:#5a7a8a">Speed ≥ |Velocity| always. Equal only if motion is one-way straight line.</span>`;
+}
+calcSV();
+
+// ── S3: ACCELERATION CALC ─────────────────────────
+function calcAcc() {
+  const u = +C('u-sl').value, v = +C('v-sl').value, t = +C('t-sl').value;
+  C('u-v').textContent = u+' m/s';
+  C('v-v').textContent = v+' m/s';
+  C('t-v').textContent = t+' s';
+  const a = (v-u)/t;
+  C('acc-res').innerHTML =
+    `a = (${v} − ${u}) / ${t} = <span class="rv">${a.toFixed(2)} m/s²</span><br>
+     ${a>0?'<span class="rv2">↑ Accelerating</span>':a<0?'<span style="color:#c0392b">↓ Decelerating</span>':'<span style="color:#7a8a94">→ Constant velocity</span>'}`;
+}
+calcAcc();
+
+// ── S4: SUVAT SOLVER ──────────────────────────────
+function solveSUVAT() {
+  const get = id => { const v = C(id).value; return v===''?null:+v; };
+  const s=get('sv-s'), u=get('sv-u'), v=get('sv-v'), a=get('sv-a'), t=get('sv-t');
+  const known = [s,u,v,a,t].filter(x=>x!==null).length;
+  if(known < 3) { C('suvat-res').textContent='Enter at least 3 known values.'; return; }
+  let rs=s,ru=u,rv=v,ra=a,rt=t;
+  // try to solve
+  try {
+    if(ru!==null&&ra!==null&&rt!==null&&rv===null) rv=ru+ra*rt;
+    if(ru!==null&&ra!==null&&rt!==null&&rs===null) rs=ru*rt+.5*ra*rt*rt;
+    if(ru!==null&&rv!==null&&ra!==null&&rs===null) rs=(rv*rv-ru*ru)/(2*ra);
+    if(ru!==null&&rv!==null&&rt!==null&&rs===null) rs=.5*(ru+rv)*rt;
+    if(rv!==null&&ra!==null&&rt!==null&&ru===null) ru=rv-ra*rt;
+    if(rs!==null&&ru!==null&&rv!==null&&rt===null&&ru!==rv) rt=2*rs/(ru+rv);
+    if(rs!==null&&ru!==null&&rt!==null&&ra===null) ra=2*(rs-ru*rt)/(rt*rt);
+    if(rs!==null&&ru!==null&&rv!==null&&ra===null&&rt!==null) ra=(rv-ru)/rt;
+  } catch(e){}
+  const fmt = x => x===null ? '?' : x.toFixed(3);
+  C('suvat-res').innerHTML =
+    `<span style="color:#e8521a">s</span> = ${fmt(rs)} m &nbsp;|&nbsp;
+     <span style="color:#e8521a">u</span> = ${fmt(ru)} m/s &nbsp;|&nbsp;
+     <span style="color:#e8521a">v</span> = ${fmt(rv)} m/s &nbsp;|&nbsp;
+     <span style="color:#e8521a">a</span> = ${fmt(ra)} m/s² &nbsp;|&nbsp;
+     <span style="color:#e8521a">t</span> = ${fmt(rt)} s`;
+}
+
+// ── S5: UNIFORM MOTION ────────────────────────────
+function drawUniform() {
+  const c = ctx('uniform-canvas'); const W=560,H=160;
+  c.clearRect(0,0,W,H);
+  // s-t graph (left)
+  const ox1=40, oy1=130;
+  drawAxes(c,260,H,ox1,oy1,'t','s');
+  c.strokeStyle='#e8521a'; c.lineWidth=2.5;
+  c.beginPath(); c.moveTo(ox1,oy1); c.lineTo(240,50); c.stroke();
+  c.fillStyle='#7a8a94'; c.font='10px Fira Code'; c.textAlign='center';
+  c.fillText('s–t: straight line (const v)', 140, H-5);
+  // v-t graph (right)
+  const ox2=300, oy2=100;
+  drawAxes(c,560,H,ox2,oy2,'t','v');
+  c.strokeStyle='#1a2840'; c.lineWidth=2.5;
+  c.beginPath(); c.moveTo(ox2,60); c.lineTo(540,60); c.stroke();
+  c.fillStyle='#7a8a94'; c.font='10px Fira Code'; c.textAlign='center';
+  c.fillText('v–t: horizontal line (a=0)', 420, H-5);
+}
+drawUniform();
+
+function simUniform() {
+  const v = +C('uv-sl').value, t = +C('ut-sl').value;
+  C('uv-v').textContent = v+' m/s';
+  C('ut-v').textContent = t+' s';
+  C('unif-res').innerHTML =
+    `s = v × t = ${v} × ${t} = <span class="rv">${v*t} m</span><br>
+     Acceleration = <span class="rv2">0 m/s²</span> (uniform motion)`;
+}
+simUniform();
+
+// ── S6: UNIFORM ACCEL ─────────────────────────────
+function calcUA() {
+  const u = +C('ua-u').value, a = +C('ua-a').value, t = +C('ua-t').value;
+  C('ua-uv').textContent = u+' m/s';
+  C('ua-av').textContent = a+' m/s²';
+  C('ua-tv').textContent = t+' s';
+  const v = u + a*t, s = u*t + .5*a*t*t;
+  C('ua-res').innerHTML =
+    `v = u+at = ${u}+${a}×${t} = <span class="rv">${v.toFixed(2)} m/s</span><br>
+     s = ut+½at² = ${u}×${t}+½×${a}×${t*t} = <span class="rv2">${s.toFixed(2)} m</span>`;
+  // draw s-t curve
+  const cv = C('ua-canvas'); const c = cv.getContext('2d');
+  const W=540, H=160;
+  c.clearRect(0,0,W,H);
+  const ox=40, oy=H-20;
+  drawAxes(c, W, H, ox, oy, 't(s)', 's(m)', '#ddd9ce');
+  const maxS = Math.max(1, s);
+  const steps = 200;
+  c.strokeStyle='#e8521a'; c.lineWidth=2; c.beginPath();
+  for(let i=0;i<=steps;i++){
+    const ti=i/steps*t, si=u*ti+.5*a*ti*ti;
+    const px=ox+(ti/t)*(W-ox-20), py=oy-(si/maxS)*(oy-15);
+    i===0?c.moveTo(px,py):c.lineTo(px,py);
+  }
+  c.stroke();
+  c.fillStyle='#e8521a'; c.beginPath(); c.arc(W-20,oy-(s/maxS)*(oy-15),4,0,Math.PI*2); c.fill();
+}
+calcUA();
+
+// ── S7: FREE FALL ─────────────────────────────────
+function calcFF() {
+  const h = +C('ff-h').value, g = +C('ff-g').value;
+  C('ff-hv').textContent = h+' m';
+  const t = Math.sqrt(2*h/g), vf = g*t;
+  C('ff-res').innerHTML =
+    `Time to fall: t = √(2h/g) = √(${(2*h).toFixed(0)}/${g}) = <span class="rv">${t.toFixed(2)} s</span><br>
+     Final velocity: v = gt = ${g}×${t.toFixed(2)} = <span class="rv2">${vf.toFixed(2)} m/s</span>`;
+}
+calcFF();
+
+// ── S8: PROJECTILE ────────────────────────────────
+function simProj() {
+  const u = +C('pj-u').value, ang = +C('pj-ang').value, h0 = +C('pj-h').value;
+  C('pj-uv').textContent = u+' m/s';
+  C('pj-angv').textContent = ang+'°';
+  C('pj-hv').textContent = h0+' m';
+  const th = ang*Math.PI/180, g=9.81;
+  const ux=u*Math.cos(th), uy=u*Math.sin(th);
+  // time of flight
+  const disc = uy*uy+2*g*h0;
+  const tof = (uy+Math.sqrt(disc))/g;
+  const range = ux*tof;
+  const hmax = h0 + uy*uy/(2*g);
+  // draw
+  const cv=C('proj-canvas'); const c=cv.getContext('2d');
+  const W=560,H=220;
+  c.clearRect(0,0,W,H);
+  const ox=30, oy=H-30;
+  drawAxes(c,W,H,ox,oy,'x (m)','y (m)');
+  const scaleX=Math.max(1,range), scaleY=Math.max(1,hmax);
+  const steps=300;
+  c.strokeStyle='#e8521a'; c.lineWidth=2; c.beginPath();
+  for(let i=0;i<=steps;i++){
+    const t=i/steps*tof;
+    const x=ux*t, y=h0+uy*t-.5*g*t*t;
+    if(y<0) break;
+    const px=ox+x/scaleX*(W-ox-20), py=oy-y/hmax*(oy-15);
+    i===0?c.moveTo(px,py):c.lineTo(px,py);
+  }
+  c.stroke();
+  // launch arrow
+  c.strokeStyle='#1a2840'; c.lineWidth=1.5; c.setLineDash([4,3]);
+  c.beginPath(); c.moveTo(ox,oy); c.lineTo(ox+ux/u*60, oy-uy/u*60); c.stroke();
+  c.setLineDash([]);
+  // labels
+  c.fillStyle='#e8521a'; c.font='11px Fira Code'; c.textAlign='center';
+  c.fillText('Range: '+range.toFixed(1)+' m', W/2, H-8);
+  c.fillStyle='#1a2840';
+  c.fillText('H_max: '+hmax.toFixed(1)+' m', W-80, oy-hmax/hmax*(oy-15)-5);
+  C('proj-res').innerHTML =
+    `Range = <span class="rv">${range.toFixed(2)} m</span> &nbsp;|&nbsp;
+     Max height = <span class="rv2">${hmax.toFixed(2)} m</span> &nbsp;|&nbsp;
+     Time of flight = <span class="rv">${tof.toFixed(2)} s</span><br>
+     v_x = ${ux.toFixed(2)} m/s (constant) &nbsp;|&nbsp; v_y at launch = ${uy.toFixed(2)} m/s`;
+}
+simProj();
+
+// ── S9: s-t GRAPH ─────────────────────────────────
+function drawST() {
+  const c=ctx('st-canvas'); const W=560,H=200;
+  c.clearRect(0,0,W,H);
+  const ox=50, oy=H-30;
+  drawAxes(c,W,H,ox,oy,'t (s)','s (m)');
+  const segs = [
+    {c:'#e8521a',label:'At rest',pts:[[0,80],[60,80]]},
+    {c:'#1a2840',label:'Const v (+)',pts:[[60,80],[160,40]]},
+    {c:'#2a7a4b',label:'Accel',pts:[[160,40],[260,10],[300,5]]},
+    {c:'#c0392b',label:'Back (−v)',pts:[[300,5],[380,80]]},
+  ];
+  const labels = ['At rest','Const velocity','Accelerating','Negative velocity'];
+  const cols = ['#e8521a','#1a2840','#2a7a4b','#c0392b'];
+  // draw each
+  const scaleX = (x) => ox+x/380*(W-ox-20);
+  const scaleY = (y) => oy-((190-y)/160)*(oy-15);
+  segs.forEach((seg,i) => {
+    c.strokeStyle=cols[i]; c.lineWidth=2.5; c.beginPath();
+    seg.pts.forEach((p,j)=>j===0?c.moveTo(scaleX(p[0]),scaleY(p[1])):c.lineTo(scaleX(p[0]),scaleY(p[1])));
+    c.stroke();
+  });
+  // legend
+  const lx=[60,160,240,320];
+  cols.forEach((col,i)=>{
+    c.fillStyle=col; c.font='9px Fira Code'; c.textAlign='center';
+    c.fillText(labels[i], scaleX(lx[i]), H-10);
+  });
+}
+drawST();
+
+// ── S10: v-t GRAPH ────────────────────────────────
+function drawVT() {
+  const u=+C('vt-u').value, a=+C('vt-a').value, t=+C('vt-t').value;
+  C('vt-uv').textContent=u+' m/s';
+  C('vt-av').textContent=a+' m/s²';
+  C('vt-tv').textContent=t+' s';
+  const v_f=u+a*t;
+  const cv=C('vt-canvas'); const c=cv.getContext('2d');
+  const W=540,H=200;
+  c.clearRect(0,0,W,H);
+  const vmin=Math.min(0,u,v_f)-5, vmax=Math.max(u,v_f)+5;
+  const ox=50, oy=H-30-(-vmin/(vmax-vmin))*(H-50);
+  drawAxes(c,W,H,ox,Math.max(15,Math.min(H-15,oy)),'t (s)','v (m/s)');
+  const sx=x=>ox+x/t*(W-ox-20);
+  const sy=y=>H-30-((y-vmin)/(vmax-vmin))*(H-50);
+  // fill area
+  c.fillStyle='rgba(232,82,26,0.12)';
+  c.beginPath(); c.moveTo(sx(0),sy(u)); c.lineTo(sx(t),sy(v_f)); c.lineTo(sx(t),sy(0)); c.lineTo(sx(0),sy(0)); c.closePath(); c.fill();
+  // line
+  c.strokeStyle='#e8521a'; c.lineWidth=3;
+  c.beginPath(); c.moveTo(sx(0),sy(u)); c.lineTo(sx(t),sy(v_f)); c.stroke();
+  // dots
+  c.fillStyle='#e8521a'; c.beginPath(); c.arc(sx(0),sy(u),5,0,Math.PI*2); c.fill();
+  c.fillStyle='#1a2840'; c.beginPath(); c.arc(sx(t),sy(v_f),5,0,Math.PI*2); c.fill();
+  // labels
+  c.fillStyle='#e8521a'; c.font='10px Fira Code'; c.textAlign='left';
+  c.fillText('u='+u, sx(0)+6, sy(u)-6);
+  c.fillStyle='#1a2840'; c.fillText('v='+v_f.toFixed(1), sx(t)-30, sy(v_f)-6);
+  c.fillStyle='rgba(232,82,26,.6)'; c.font='9px Fira Code'; c.textAlign='center';
+  c.fillText('Area = displacement', sx(t/2), sy(Math.min(u,v_f)/2+1));
+  // area = displacement = ½(u+v)t
+  const area = .5*(u+v_f)*t;
+  C('vt-res').innerHTML=
+    `Gradient (acceleration) = (${v_f.toFixed(1)}−${u})/${t} = <span class="rv">${a} m/s²</span><br>
+     Area (displacement) = ½×(${u}+${v_f.toFixed(1)})×${t} = <span class="rv2">${area.toFixed(2)} m</span>`;
+}
+drawVT();
+
+// ── S11: a-t GRAPH ────────────────────────────────
+function drawAT() {
+  const c=ctx('at-canvas'); const W=560,H=200;
+  c.clearRect(0,0,W,H);
+  const ox=50,oy=120;
+  drawAxes(c,W,H,ox,oy,'t (s)','a (m/s²)');
+  const sx=x=>ox+x/5*(W-ox-20);
+  const sy=y=>oy-y*35;
+  // zero acceleration phase
+  c.strokeStyle='#7a8a94'; c.lineWidth=2;
+  c.beginPath(); c.moveTo(sx(0),sy(0)); c.lineTo(sx(1.5),sy(0)); c.stroke();
+  // positive acceleration phase
+  c.strokeStyle='#e8521a'; c.lineWidth=2.5;
+  c.beginPath(); c.moveTo(sx(1.5),sy(2)); c.lineTo(sx(3),sy(2)); c.stroke();
+  c.fillStyle='rgba(232,82,26,.15)';
+  c.fillRect(sx(1.5),sy(2),sx(3)-sx(1.5),sy(0)-sy(2));
+  // deceleration phase
+  c.strokeStyle='#c0392b'; c.lineWidth=2.5;
+  c.beginPath(); c.moveTo(sx(3),sy(-1.5)); c.lineTo(sx(4.5),sy(-1.5)); c.stroke();
+  c.fillStyle='rgba(192,57,43,.15)';
+  c.fillRect(sx(3),sy(0),sx(4.5)-sx(3),sy(-1.5)-sy(0));
+  // labels
+  c.fillStyle='#e8521a'; c.font='10px Fira Code'; c.textAlign='center';
+  c.fillText('a=+2 m/s² → Δv=+3 m/s', sx(2.25), sy(2.3));
+  c.fillStyle='#c0392b';
+  c.fillText('a=−1.5 m/s² → Δv=−2.25 m/s', sx(3.75), sy(-1.8));
+  c.fillStyle='#7a8a94';
+  c.fillText('a=0', sx(.75), sy(0.4));
+}
+drawAT();
+
+// ── S12: VECTOR RESOLVER ──────────────────────────
+function resolveVec() {
+  const v=+C('vr-v').value, ang=+C('vr-ang').value;
+  C('vr-vv').textContent=v+' m/s';
+  C('vr-angv').textContent=ang+'°';
+  const th=ang*Math.PI/180;
+  const vx=v*Math.cos(th), vy=v*Math.sin(th);
+  const cv=C('vec-canvas'); const c=cv.getContext('2d');
+  const W=340,H=200;
+  c.clearRect(0,0,W,H);
+  const ox=50,oy=H-40;
+  // grid lines
+  c.strokeStyle='#f0eee6'; c.lineWidth=1;
+  for(let i=0;i<W;i+=30){c.beginPath();c.moveTo(i,0);c.lineTo(i,H);c.stroke();}
+  for(let i=0;i<H;i+=30){c.beginPath();c.moveTo(0,i);c.lineTo(W,i);c.stroke();}
+  const scale=2.5;
+  const arrowHead=(x1,y1,x2,y2,col)=>{
+    const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+    const nx=dx/len,ny=dy/len;
+    c.fillStyle=col;c.beginPath();
+    c.moveTo(x2,y2);
+    c.lineTo(x2-nx*10+ny*5,y2-ny*10-nx*5);
+    c.lineTo(x2-nx*10-ny*5,y2-ny*10+nx*5);
+    c.closePath();c.fill();
+  };
+  // vx
+  c.strokeStyle='#2a7a4b'; c.lineWidth=2;
+  c.beginPath(); c.moveTo(ox,oy); c.lineTo(ox+vx*scale,oy); c.stroke();
+  arrowHead(ox,oy,ox+vx*scale,oy,'#2a7a4b');
+  // vy
+  c.strokeStyle='#1a2840'; c.lineWidth=2;
+  c.beginPath(); c.moveTo(ox+vx*scale,oy); c.lineTo(ox+vx*scale,oy-vy*scale); c.stroke();
+  arrowHead(ox+vx*scale,oy,ox+vx*scale,oy-vy*scale,'#1a2840');
+  // resultant
+  c.strokeStyle='#e8521a'; c.lineWidth=3;
+  c.beginPath(); c.moveTo(ox,oy); c.lineTo(ox+vx*scale,oy-vy*scale); c.stroke();
+  arrowHead(ox,oy,ox+vx*scale,oy-vy*scale,'#e8521a');
+  // angle arc
+  c.strokeStyle='#7a8a94'; c.lineWidth=1; c.setLineDash([3,3]);
+  c.beginPath(); c.arc(ox,oy,35,0,-th,true); c.stroke();
+  c.setLineDash([]);
+  // labels
+  c.font='11px Fira Code'; c.fillStyle='#2a7a4b'; c.textAlign='center';
+  c.fillText('vₓ='+vx.toFixed(1),ox+vx*scale/2,oy+16);
+  c.fillStyle='#1a2840'; c.textAlign='left';
+  c.fillText('vᵧ='+vy.toFixed(1),ox+vx*scale+6,oy-vy*scale/2);
+  c.fillStyle='#e8521a'; c.textAlign='center';
+  c.fillText('|v|='+v,ox+vx*scale/2,oy-vy*scale/2);
+  c.fillStyle='#7a8a94'; c.fillText(ang+'°',ox+42,oy-8);
+  C('vec-res').innerHTML=
+    `Horizontal: v_x = ${v}·cos${ang}° = <span class="rv">${vx.toFixed(2)} m/s</span><br>
+     Vertical: v_y = ${v}·sin${ang}° = <span class="rv2">${vy.toFixed(2)} m/s</span><br>
+     Check: √(${vx.toFixed(1)}²+${vy.toFixed(1)}²) = <span class="rv">${Math.sqrt(vx*vx+vy*vy).toFixed(2)} m/s ✓</span>`;
+}
+resolveVec();
+
+// ── QUIZ ──────────────────────────────────────────
+function ans(btn, correct, qid) {
+  btn.closest('.qopts').querySelectorAll('.qopt').forEach(o=>{o.onclick=null;o.style.cursor='default';});
+  btn.classList.add(correct?'correct':'wrong');
+  const fb=document.getElementById(qid+'-fb');
+  fb.classList.add('show');
+  if(!correct) fb.textContent='❌ Not quite — '+fb.textContent.replace('✅ ','');
+}
+
+// init progress
+document.getElementById('prog').style.width='0%';
+</script>
+</body>
+</html>
+
